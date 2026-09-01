@@ -28,11 +28,14 @@ if st.button("Run Agentic Review") and code_diff:
 
     with st.spinner("Analyzing code diff & executing agentic review..."):
         try:
+            # Clean string encoding to prevent ASCII codec issues with emojis
+            clean_input = code_diff.encode("utf-8", errors="ignore").decode("utf-8")
+            
             response = client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"Review Focus: {review_depth}\n\nCode Diff:\n{code_diff}"}
+                    {"role": "user", "content": f"Review Focus: {review_depth}\n\nCode Diff:\n{clean_input}"}
                 ],
                 temperature=0.2
             )
