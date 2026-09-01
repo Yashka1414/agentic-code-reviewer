@@ -18,7 +18,7 @@ code_diff = st.text_area("Paste Code / GitHub Diff here:", height=220, placehold
 if st.button("Run Agentic Review") and code_diff:
     system_prompt = (
         "You are an Expert Principal Software Engineer acting as an Automated Code Review Agent. "
-        "Analyze the provided code diff/snippet and generate a structured review with: "
+        "Analyze the provided code diff/snippet and generate a structured review with:\n"
         "1. Executive Summary & Design Understanding\n"
         "2. Bug & Vulnerability Identification\n"
         "3. Performance & Code Quality Suggestions\n"
@@ -27,15 +27,18 @@ if st.button("Run Agentic Review") and code_diff:
     )
 
     with st.spinner("Analyzing code diff & executing agentic review..."):
-        response = client.chat.completions.create(
-            model="llama3-70b-8192",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Review Focus: {review_depth}\n\nCode Diff:\n{code_diff}"}
-            ],
-            temperature=0.2
-        )
-        
-        st.success("Review Complete!")
-        st.markdown("### 📋 Agent Code Review Report")
-        st.markdown(response.choices[0].message.content)
+        try:
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"Review Focus: {review_depth}\n\nCode Diff:\n{code_diff}"}
+                ],
+                temperature=0.2
+            )
+            
+            st.success("Review Complete!")
+            st.markdown("### 📋 Agent Code Review Report")
+            st.markdown(response.choices[0].message.content)
+        except Exception as e:
+            st.error(f"Error executing review: {e}")
