@@ -8,7 +8,6 @@ st.title("🗄️ Text-to-SQL Engine & Query Executor")
 # Security & API Setup
 st.sidebar.header("⚙️ API Configuration")
 api_key = st.sidebar.text_input("Enter Groq API Key:", type="password")
-
 if not api_key:
     st.info("Please enter your Groq API Key in the sidebar to run SQL synthesis.")
     st.stop()
@@ -63,25 +62,25 @@ if st.button("Generate & Execute SQL") and query_input:
             "You are an expert SQL Data Engineer. Translate the user's natural language request into valid SQLite code. "
             "Output ONLY the raw SQL query inside SQL code block. Do not add markdown text outside code block."
         )
-        
+
         try:
             # Using active, production-stable Groq Model ID
             res = client.chat.completions.create(
-                model="llama3-8b-8192",
+                model="openai/gpt-oss-20b",  # updated: llama3-8b-8192 was decommissioned by Groq
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Schema: employees(id, name, department, salary)\nRequest: {query_input}"}
                 ],
                 temperature=0.1
             )
-            
+
             raw_sql = res.choices[0].message.content.strip().replace("```sql", "").replace("```", "").strip()
-            
+
             col1, col2 = st.columns(2)
             with col1:
                 st.markdown("### 🛠️ Generated SQL Query")
                 st.code(raw_sql, language="sql")
-                
+
             with col2:
                 st.markdown("### 📊 Database Results")
                 try:
@@ -92,6 +91,6 @@ if st.button("Generate & Execute SQL") and query_input:
                     st.dataframe(results, use_container_width=True)
                 except Exception as sql_err:
                     st.error(f"SQL Execution Error: {str(sql_err)}")
-                    
+
         except Exception as e:
             st.error(f"REST API Execution Error: {str(e)}")
